@@ -1,0 +1,6 @@
+declare foo :: integer execute
+    foo := 35 ;
+    declare bar :: integer execute
+	bar := foo + 2
+    done
+done
