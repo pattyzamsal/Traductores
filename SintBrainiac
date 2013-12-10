@@ -1,0 +1,470 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Archivo: SintBraniac
+# Analizador lexicografico y sintactico del lenguaje Braniac con arbol sintactico abstracto
+# Autores: Vanessa Balleste y Patricia Zambrano
+# Carnet: 08-10091 y 09-10919
+# Fecha: 13/12/2013
+
+# importacion de las librerias
+import ply.lex as lex 
+import ply.yacc as yacc
+import sys
+
+#***********************************************************
+#                                                          *
+#                 COMIENZO DE LA ENTREGA 1                 *
+#                                                          *
+#***********************************************************
+
+#************************************************
+# Lista total de los tokens del leguaje braniac. 
+#************************************************
+
+tokens = [
+    'Ident',
+    'Num',
+    'Coma',
+    'Punto',
+    'PuntoYComa',
+    'ParAbre',
+    'ParCierra',
+    'CorcheteAbre',
+    'CorcheteCierra',
+    'LlaveAbre',
+    'LlaveCierra',
+    'Type',
+    'Mas',
+    'Menos',
+    'Mult',
+    'Div',
+    'Mod',
+    'Conjuncion',
+    'Disyuncion',
+    'Negacion',
+    'Menor',
+    'MenorIgual',
+    'Mayor',
+    'MayorIgual',
+    'Igual',
+    'Desigual',
+    'Concat',
+    'Inspeccion',
+    'Asignacion'
+]
+
+#**********************************************************************
+# Palabras reservadas del lenguaje braniac, a traves de un diccionario
+# donde la clave representa la palabra reservada del lenguaje braniac
+# y los valores representaran el nombre de los tokens.
+#**********************************************************************
+
+reserved = {
+    'declare' : 'Declare',
+    'execute' : 'Execute',
+    'done' : 'Done',
+    'integer' : 'Integer',
+    'boolean' : 'Boolean',
+    'tape' : 'Tape',
+    'from' : 'From',
+    'for' : 'For',
+    'to' : 'To',
+    'if' : 'If',
+    'then' : 'Then',
+    'else' : 'Else',
+    'while' : 'While',
+    'do' : 'Do',
+    'true' : 'True',
+    'false' : 'False',
+    'read' : 'Read',
+    'write' : 'Write',
+    'at' : 'At'
+}
+
+# conjunto total de tokens del lenguaje
+tokens += list(reserved.values())
+
+#************************************************
+# Expresiones regulares sencillas para los tokens.
+#************************************************
+
+t_Coma = r','
+t_Punto = r'\.'
+t_PuntoYComa = r';'
+t_ParAbre  = r'\('
+t_ParCierra  = r'\)'
+t_CorcheteAbre = r'\['
+t_CorcheteCierra = r'\]'
+t_LlaveAbre = r'\{'
+t_LlaveCierra = r'\}'
+t_Type = r'\:\:'
+t_Mas = r'\+'
+t_Menos = r'-'
+t_Mult = r'\*'
+t_Div = r'/'
+t_Mod = r'\%'
+t_Conjuncion = r'/\\'
+t_Disyuncion = r'\\/'
+t_Negacion = r'~'
+t_Menor = r'<'
+t_MenorIgual = r'<='
+t_Mayor = r'>'
+t_MayorIgual = r'>='
+t_Igual = r'='
+t_Desigual = r'/='
+t_Concat = r'&'
+t_Inspeccion = r'\#'
+t_Asignacion = r':='
+
+#**********************
+# Definir los tokens. 
+#**********************
+
+# Regla para capturar las variables
+def t_Ident(t):
+	r'[a-zA-Z][a-zA-Z0-9]*'
+	# revisamos que no sea palabra reservada
+	t.type = reserved.get(t.value,'Ident')
+	return t
+
+# Regla para capturar los numeros, no necesariamente tienen que ser enteros pues los numeros todavia no estan definidos particularmente en un sistema de numeracion en especifico
+def t_Num(t):
+	r'[0-9][0-9]*'
+	return t
+
+# se ignoran los bloques de comentarios. Con el .* se hace que ignore cualquier caracter que este entre $- y -$
+# la funcion count cuenta cuantas veces aparece un salto de linea dentro de los comentarios
+def t_Comentario(t):
+	r'(?s)\$\-.*?\-\$'
+	t.lexer.lineno += t.value.count('\n')
+	pass
+
+# se ignoran las lineas de comentarios
+def t_LineaComentario(t):
+	r'\$\$.*?\n'
+	t.lexer.lineno += t.value.count('\n')
+	pass
+
+#***************************************
+# Regla para capturar el salto de linea.
+#**************************************
+
+def t_newline(t):
+	r'\n+'
+	t.lexer.lineno += len(t.value)
+
+#*******************************
+# Hallar la columna del token.
+#*******************************
+
+def hallar_columna(input, lexpos):
+	ultimo = input.rfind('\n',0,lexpos)
+	if ultimo < 0:
+	    ultimo = -1
+	column = (lexpos - ultimo)
+	return column
+
+# variable para saber si ocurrio un error
+errores = 0
+
+# definimos la lista que contendran los errores
+lista_errores = []
+
+# definimos la lista que contendran los tokens
+lista_Tokens = []
+
+# se ignoran los espacios en blanco y los tabuladores
+t_ignore = ' \t\r\f\v'
+
+# Regla para tratar los errores
+def t_error(t):
+	if errores == 0: exec('globals()["lista_errores"] = []')
+	exec('globals()["errores"] = 1')
+	lista_errores.append("Error: Caracter inesperado \"%s\" en fila %d, columna %d." % (t.value[0], t.lexer.lineno, hallar_columna(archivo,t.lexpos)))
+	t.lexer.skip(1)
+
+#*************************
+# Se construye el Lexer. 
+#*************************
+lexer = lex.lex()
+
+#**************************************************************
+# Dandole a lexer el argumento de entrada. Evaluando el Lexer
+#**************************************************************
+
+if (len(sys.argv) == 2):
+	# Se abre el archivo y se revisa que se abra correctamente
+	try:
+	    f = open(sys.argv[1], "r")
+	except IOError:
+	    print 'Error: No se pudo abrir el archivo'
+	    sys.exit(0)
+	# Se abre el archivo y se almacena en una variable
+	archivo = f.read()
+	# Se cierra el archivo
+	f.close()
+	# Si el archivo esta vacio no se hace nada
+	if len(archivo) == 0:
+	    print "El archivo .br esta vacio"
+	    sys.exit(0)
+	# Se coloca el archivo como parametro para el lexer
+	lexer.input(archivo)
+	# Se leen los tokens del archivo
+	while True:
+		tok = lexer.token()
+		if not tok: break
+		if tok.type == 'Ident' :
+			imprimir = 'Tk%s("%s")' % (str(tok.type), tok.value)
+		elif tok.type == 'Num' :
+			imprimir = 'Tk%s(%s)' % (str(tok.type), tok.value)
+		else:		
+			imprimir = 'Tk%s' % str(tok.type) 
+		if errores == 0: lista_Tokens.append(imprimir)
+	if errores == 1:
+	    # el break hace que se imprima el primer error lexicografico
+	    for i in lista_errores:
+		  print i
+		  break
+else:
+	print "No se coloco un archivo para analizar o se colocaron argumentos de mas."
+	sys.exit(0)
+
+#*********************************************************
+# Si hubo errores lexicograficos se termina el programa. 
+#*********************************************************
+if errores == 1:
+      sys.exit(0)
+
+#***********************************************************
+#                                                          *
+#                   FIN DE LA ENTREGA 1                    *
+#                                                          *
+#***********************************************************
+
+#********************************
+# Precedencia de los operadores *
+# El orden va de menor a mayor. *
+#********************************
+
+precedence = ( 
+	('nonassoc', 'Asignacion'),	# Para evitar los conflictos con el =. 
+	('nonassoc', 'Then'),		# Para evitar los conflictos con el if,
+	('left', 'Disyuncion'),
+	('left', 'Conjuncion'),
+	('right','Negacion'),
+	('nonassoc', 'Igual', 'Desigual'),
+	('nonassoc', 'Menor', 'MenorIgual', 'Mayor', 'MayorIgual'),
+	('left', 'Mas', 'Menos'),
+	('left', 'Mult', 'Div', 'Mod'),
+	('right','UMenos'),
+	('left','Concat'),
+	('right','Inspeccion'),
+	('left','At')
+)
+
+#*********************************************
+# Definicion de las clases por cada simbolo. *
+#*********************************************
+
+
+#*********************************************
+# Definicion de la gramatica. *
+#*********************************************
+
+#Simbolo inicial
+start = 'PROGRAM'
+
+#Gramatica para el token Program
+#
+def p_PROGRAM(p):
+	'''PROGRAM : DECLARE Execute INSTRUCCION
+	      | Execute INSTRUCCION '''
+  	if len(p) == 3:
+  		p[0] = p[2]
+  #else:
+  #	p[0] = clase1(p[1], p[3]) 
+
+  
+# Gramatica para un subprograma
+def p_SUBPROGRAM(p):
+	''' SUBPROGRAM : DECLARE Execute INSTRUCCION'''
+  
+#Gramatica para las declaraciones del lenguaje
+#
+def p_DECLARE(p):
+	'''DECLARE : Declare LISTADECLARA '''
+	p[0] = p[2]
+#Gramatica para la lista de declaraciones
+#
+def p_LISTADECLARA(p):
+	'''LISTADECLARA : LISTADECLARA PuntoYComa IDENT Type TIPO
+	    		| IDENT Type TIPO '''
+
+
+#Gramatica para los identificadores
+#
+def p_IDENT(p):
+	'''IDENT : IDENT Coma Ident
+		  | Ident'''
+
+#Gramatica para los tipos
+#
+def p_TIPO(p):
+	'''TIPO : Integer
+		| Boolean
+		| Tape'''
+
+#Gramatica para las instrucciones
+#
+def p_INSTRUCCION(p):
+	'''INSTRUCCION : INSTRUCCION PuntoYComa INSTRUCCION
+			| INSTRUCCION Done
+			| SUBPROGRAM
+		  	| ASIGNACION
+		  	| INSTAPE
+	      		| CONDICIONAL
+	      		| ITERACIONINDET
+	      		| ITERACIONDET
+	      		| ENTRADA
+	      		| SALIDA'''
+
+#Gramatica para la asignacion
+#
+def p_ASIGNACION(p):
+	'''ASIGNACION : Ident Asignacion EXP'''
+
+#Gramatica para los condicionales
+#
+def p_CONDICIONAL(p):
+	'''CONDICIONAL : If EXP Then INSTRUCCION Else INSTRUCCION
+	      		| If EXP Then INSTRUCCION'''
+
+#Gramatica para las expresiones
+#
+def p_EXP(p):
+	'''EXP : ParAbre EXP ParCierra
+		| EXPBINBOOL
+		| EXPBINARIT
+		| EXPUNABOOL
+		| EXPUNAARIT
+		| EXPTAPE
+		| INSTAPE
+		| BOOLEAN
+		| Num
+		| Ident'''
+	if len(p) ==2:
+		p[0]=p[1]
+
+#Gramatica para las expresiones binarias booleanas
+#
+def p_EXPBINBOOL(p):
+	'''EXPBINBOOL : EXP Conjuncion EXP
+		      | EXP Disyuncion EXP
+		      | EXP Mayor EXP
+		      | EXP MayorIgual EXP
+		      | EXP Menor EXP
+		      | EXP MenorIgual EXP
+		      | EXP Igual EXP
+		      | EXP Desigual EXP'''
+
+#Gramatica para las experesiones binarias aritmeticas
+#
+def p_EXPBINARIT(p):
+	''' EXPBINARIT : EXP Mas EXP
+			| EXP Menos EXP
+			| EXP Mult EXP
+			| EXP Div EXP
+			| EXP Mod EXP'''
+
+#Gramatica para las expresiones unarias booleanas
+#
+def p_EXPUNABOOL(p):
+	'''EXPUNABOOL : Negacion EXP '''
+
+
+#Gramatica para las expresiones unarias aritmeticas
+#
+def p_EXPUNAARIT(p):
+	'''EXPUNAARIT : Menos EXP %prec UMenos'''	
+
+def p_INSTAPE(p):
+	'''INSTAPE : BINSTRUCCIONES At EXP
+		    | Inspeccion EXP
+		    | EXP Concat EXP'''
+
+#Gramatica para las b-intrucciones
+#
+def p_BINSTRUCCIONES(p):
+	'''BINSTRUCCIONES : LlaveAbre OPBINSTRUCCIONES LlaveCierra '''
+
+#Gramatica para las operaciones de las b-instrucciones
+#
+def p_OPBINSTRUCCIONES(p):
+	'''OPBINSTRUCCIONES : OPBINSTRUCCIONES Mas
+			    | OPBINSTRUCCIONES Menos
+			    | OPBINSTRUCCIONES Mayor
+			    | OPBINSTRUCCIONES Menor
+			    | OPBINSTRUCCIONES Punto
+			    | OPBINSTRUCCIONES Coma
+			    | '''
+
+#Gramatica para el tipo tape
+#
+def p_EXPTAPE(p):
+	'''EXPTAPE : CorcheteAbre Num CorcheteCierra
+		    | CorcheteAbre Ident CorcheteCierra 
+		    | CorcheteAbre EXPBINARIT CorcheteCierra'''
+
+#Gramatica para los BOOLEANOS
+#
+def p_BOOLEAN(p):
+	'''BOOLEAN : True
+		    | False '''
+
+#Gramatica para la iteraciones indeterminada
+#
+def p_ITERACIONINDET(p):
+	'''ITERACIONINDET : While EXP Do INSTRUCCION '''	
+
+
+#Gramatica para las iteraciones determinadas
+#
+def p_ITERACIONDET(p):
+	'''ITERACIONDET : For IDENT From EXP To EXP Do INSTRUCCION
+	      		| For EXP To EXP Do INSTRUCCION '''	
+
+#Gramatica para la entrada
+#
+def p_ENTRADA(p):
+	'''ENTRADA : Read IDENT'''	
+
+#Gramatica para la salida
+#
+def p_SALIDA(p):
+	'''SALIDA : Write EXP'''
+
+#**********************************
+# Obteniendo errores de sintaxis. * 
+#**********************************
+def p_error(p):											 
+    try:
+        columna = hallar_columna(archivo,p) 
+		
+	if p.lexpos != 0:
+            print("Error de sintaxis en linea %s, columna %s: token '%s' inesperado." % (p.lineno, columna, p.value))
+        else :
+            print("Error de sintaxis en linea %s, columna %s: token '%s' inesperado." % (p.lineno, columna + 1, p.value))
+    except:
+        print "Error de sintaxis en linea %s." %(lexer.lineno)
+    
+    exit(0)
+
+#***************************************
+# Construyendo y ejecutando el parser. *
+#***************************************
+
+if __name__=='__main__':
+    lexer = lex.lex() 
+    yacc.yacc()
+    yacc.parse(archivo, lexer = lexer, tracking=True)

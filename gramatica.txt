@@ -1,0 +1,108 @@
+S -> PROGRAM
+
+PROGRAM -> DECLARE Execute INSTRUCCION
+	  |  Execute INSTRUCCION
+
+SUBPROGRAM -> DECLARE Execute INSTRUCCION
+
+DECLARE -> Declare LISTADECLARA
+
+LISTADECLARA -> LISTADECLARA PuntoYComa IDENT Type TIPO
+	      | IDENT Type TIPO
+
+IDENT -> IDENT Coma Ident
+	| Ident
+
+TIPO -> Integer
+      | Boolean
+      | Tape
+
+INSTRUCCION -> INSTRUCCION PuntoYComa INSTRUCCION
+	      | INSTRUCCION Done
+	      | SUBPROGRAM
+	      | ASIGNACION
+	      | INSTAPE
+	      | CONDICIONAL
+	      | ITERACIONINDET
+	      | ITERACIONDET
+	      | ENTRADA
+	      | SALIDA
+
+ASIGNACION -> Ident Asignacion EXP
+
+CONDICIONAL -> If EXP Then INSTRUCCION Else INSTRUCCION
+	      | If EXP Then INSTRUCCION
+
+EXP -> ParAbre EXP ParCierra
+      | EXPBINBOOL
+      | EXPBINARIT
+      | EXPUNABOOL
+      | EXPUNAARIT
+      | EXPTAPE
+      | INSTAPE
+      | BOOLEAN
+      | Num
+      | Ident
+
+EXPBINBOOL -> EXP Conjuncion EXP
+	    | EXP Disyuncion EXP
+	    | EXP Mayor EXP
+	    | EXP MayorIgual EXP
+	    | EXP Menor EXP
+	    | EXP MenorIgual EXP
+	    | EXP Igual EXP
+	    | EXP Desigual EXP
+
+EXPBINARIT -> EXP Mas EXP
+	    | EXP Menos EXP
+	    | EXP Mult EXP
+	    | EXP Div EXP
+	    | EXP Mod EXP
+
+EXPUNABOOL -> Negacion EXP
+
+EXPUNAARIT -> Menos EXP
+
+INSTAPE -> BINSTRUCCIONES At EXP
+	  	| Inspeccion EXP
+	 	| EXP Concat EXP
+
+BINSTRUCCIONES -> LlaveAbre OPBINSTRUCCIONES LlaveCierra
+
+OPBINSTRUCCIONES -> OPBINSTRUCCIONES Mas
+		    | OPBINSTRUCCIONES Menos
+		    | OPBINSTRUCCIONES Mayor
+		    | OPBINSTRUCCIONES Menor
+		    | OPBINSTRUCCIONES Punto
+		    | OPBINSTRUCCIONES Coma
+		    | λ
+
+EXPTAPE -> CorcheteAbre Num CorcheteCierra
+	  | CorcheteAbre Ident CorcheteCierra
+	  | CorcheteAbre EXPBINARIT CorcheteCierra
+
+BOOLEAN -> True
+	  | False
+
+ITERACIONINDET -> While EXP Do INSTRUCCION	
+
+ITERACIONDET -> For IDENT From EXP To EXP Do INSTRUCCION
+	      | For EXP To EXP Do INSTRUCCION
+
+ENTRADA -> Read IDENT
+
+SALIDA -> Write EXP
+
+#######################################################################
+por hacer:
+1) Hacer gramatica con nomenclatura de tokens
+2) Hacer definicion de cada elemento de las producciones(guiar por reglas para el reconocedor de andre)
+3) Hacer tabla de precedencia
+4) Ejecutar esta parte del codigo para asegurarnos de que la gramtica corre(en este punto aun no se ha formado el arbol)
+Segunda parte:
+5) Hacer clases de simbolos y otros necesarios para poder formar el arbol(no olvidar aprovechar que la herramienta ya nos hace el arbol
+   bajaran puntos por no aprovechar herramientas)
+########################################################################
+Notas:
+- El λ segun karen tenemos que dejarlo como espacio vacio
+########################################################################
