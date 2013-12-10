@@ -266,6 +266,7 @@ precedence = (
 #*********************************************
 # Definicion de las clases por cada simbolo. *
 #*********************************************
+class Expr: pass
 
 class subprogram(Expr):
     def __init__(self,left,op,right):
@@ -273,6 +274,15 @@ class subprogram(Expr):
         self.left = left
         self.right = right
         self.op = op
+        print "hola"
+
+class ident(Expr):
+	def __init__(self, left, op, right):
+		self.type = "ident"
+		self.left = left
+		self.right = right
+		self.op = op
+
 #*********************************************
 # Definicion de la gramatica. *
 #*********************************************
@@ -312,14 +322,17 @@ def p_LISTADECLARA(p):
 def p_IDENT(p):
 	'''IDENT : IDENT Coma Ident
 		  | Ident'''
-
+	if len(p) == 2:
+		p[0] = p[1]
+	else:
+		p[0] = ident(p[1],p[2], p[3])
 #Gramatica para los tipos
 #
 def p_TIPO(p):
 	'''TIPO : Integer
 		| Boolean
 		| Tape'''
-
+	p[0] = p[1]
 #Gramatica para las instrucciones
 #
 def p_INSTRUCCION(p):
