@@ -267,7 +267,12 @@ precedence = (
 # Definicion de las clases por cada simbolo. *
 #*********************************************
 
-
+class subprogram(Expr):
+    def __init__(self,left,op,right):
+        self.type = "subprogram"
+        self.left = left
+        self.right = right
+        self.op = op
 #*********************************************
 # Definicion de la gramatica. *
 #*********************************************
@@ -289,7 +294,7 @@ def p_PROGRAM(p):
 # Gramatica para un subprograma
 def p_SUBPROGRAM(p):
 	''' SUBPROGRAM : DECLARE Execute INSTRUCCION'''
-  
+  	p[0] = subprogram(p[1],p[2],p[3])
 #Gramatica para las declaraciones del lenguaje
 #
 def p_DECLARE(p):
