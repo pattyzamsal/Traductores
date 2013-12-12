@@ -1,0 +1,22 @@
+declare x, y :: integer;
+        b, c, d :: boolean execute
+    read x ;
+    read y ;
+    c := true;
+    d := false;
+    b := c /\ d;
+    b :=  d \/ c;
+    b := ~c;
+    b := y /\ d;
+    x := -y;
+    write [5];
+    while x /= y do
+        x := x - y
+    done;
+    for x from 5 to 6 do
+        y := 9
+    done;
+    for 5 to 7 do
+        x := 10
+    done
+done

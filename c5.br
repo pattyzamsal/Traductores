@@ -1,4 +1,2 @@
 declare foo, bar :: integer execute
-    bar := 3 ;
-    foo := 35
 done

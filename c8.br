@@ -1,0 +1,7 @@
+declare foo, bar :: integer execute
+   if bar > 2 then
+      foo := 35 + bar ;
+      bar := 20
+   done ;
+   bar := 7
+done

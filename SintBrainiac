@@ -268,21 +268,73 @@ precedence = (
 #*********************************************
 class Expr: pass
 
-class subprogram(Expr):
-    def __init__(self,left,op,right):
-        self.type = "subprogram"
-        self.left = left
-        self.right = right
-        self.op = op
-        print "hola"
 
-class ident(Expr):
-	def __init__(self, left, op, right):
-		self.type = "ident"
-		self.left = left
-		self.right = right
+class secuenciacion(Expr):
+    def __init__(self,inst1=None,inst2=None):
+        self.inst1 = inst1
+        self.inst2 = inst2
+
+class asignacion(Expr):
+	def __init__(self, ident=None,exp=None):
+		self.ident = ident
+		self.exp = exp
+		print ident, exp
+
+class condicional(Expr):
+	def __init__(self, exp=None, inst=None):
+		self.exp = exp
+		self.inst = inst
+
+class condicionalElse(Expr):
+	def __init__(self, exp, inst1, inst2):
+		self.exp = exp
+		self.inst1 = inst1
+		self.inst2 = inst2
+
+class parentizacion(Expr):
+	def __init__(self, exp):
+		self.exp = exp
+
+class expbinbool(Expr):
+	def __init__(self, exp1, op, exp2):
+		self.exp1 = exp1
+		self.exp2 = exp2
 		self.op = op
 
+class expbinarit(Expr):
+	def __init__(self, exp1, op, exp2):
+		self.exp1 = exp1
+		self.exp2 = exp2
+		self.op = op
+
+class instape(Expr):
+	def __init__(self, exp1, op, exp2):
+		self.exp1 = exp1
+		self.exp2 = exp2
+		self.op = op
+
+class opinstrucciones(Expr):
+	def __init__(self, inst, op):
+		self.inst = inst
+		self.op = op
+
+class iteracionindet(Expr):
+	def __init__(self, exp, inst):
+		self.exp = exp
+		self.inst = inst
+
+class iteraciondet(Expr):
+	def __init__(self, ident, exp1, exp2, inst):
+		self.ident = ident
+		self.exp1 = exp1
+		self.exp2 = exp2
+		self.inst = inst
+
+class iteraciondetExp(Expr):
+	def __init__(self, exp1, exp2, inst):
+		self.exp1 = exp1
+		self.exp2 = exp2
+		self.inst = inst
 #*********************************************
 # Definicion de la gramatica. *
 #*********************************************
@@ -297,66 +349,72 @@ def p_PROGRAM(p):
 	      | Execute INSTRUCCION '''
   	if len(p) == 3:
   		p[0] = p[2]
-  #else:
-  #	p[0] = clase1(p[1], p[3]) 
-
+  	else:
+  		p[0] = p[3] 
   
 # Gramatica para un subprograma
 def p_SUBPROGRAM(p):
 	''' SUBPROGRAM : DECLARE Execute INSTRUCCION'''
-  	p[0] = subprogram(p[1],p[2],p[3])
+ 	p[0] = p[3]
+
 #Gramatica para las declaraciones del lenguaje
 #
 def p_DECLARE(p):
 	'''DECLARE : Declare LISTADECLARA '''
-	p[0] = p[2]
+
 #Gramatica para la lista de declaraciones
 #
 def p_LISTADECLARA(p):
 	'''LISTADECLARA : LISTADECLARA PuntoYComa IDENT Type TIPO
 	    		| IDENT Type TIPO '''
 
-
 #Gramatica para los identificadores
 #
 def p_IDENT(p):
 	'''IDENT : IDENT Coma Ident
 		  | Ident'''
-	if len(p) == 2:
-		p[0] = p[1]
-	else:
-		p[0] = ident(p[1],p[2], p[3])
+
 #Gramatica para los tipos
 #
 def p_TIPO(p):
 	'''TIPO : Integer
 		| Boolean
 		| Tape'''
-	p[0] = p[1]
+
 #Gramatica para las instrucciones
 #
 def p_INSTRUCCION(p):
 	'''INSTRUCCION : INSTRUCCION PuntoYComa INSTRUCCION
-			| INSTRUCCION Done
-			| SUBPROGRAM
-		  	| ASIGNACION
-		  	| INSTAPE
+				| INSTRUCCION Done
+				| SUBPROGRAM
+		  		| ASIGNACION
+		  		| INSTAPE
 	      		| CONDICIONAL
 	      		| ITERACIONINDET
 	      		| ITERACIONDET
 	      		| ENTRADA
 	      		| SALIDA'''
+	if len(p) ==2 or len(p) == 3 :
+		p[0] = p[1]
+	else :
+		p[0] = secuenciacion(p[1],p[3])
+
 
 #Gramatica para la asignacion
 #
 def p_ASIGNACION(p):
 	'''ASIGNACION : Ident Asignacion EXP'''
+	p[0] = asignacion(p[1], p[3])
 
 #Gramatica para los condicionales
 #
 def p_CONDICIONAL(p):
 	'''CONDICIONAL : If EXP Then INSTRUCCION Else INSTRUCCION
 	      		| If EXP Then INSTRUCCION'''
+	if len(p) == 5:
+		p[0] = condicional(p[2],p[4])
+	else:
+		p[0] = condicionalElse(p[2], p[4], p[6])
 
 #Gramatica para las expresiones
 #
@@ -372,7 +430,9 @@ def p_EXP(p):
 		| Num
 		| Ident'''
 	if len(p) ==2:
-		p[0]=p[1]
+		p[0]= p[1]
+	else:
+		p[0] = parentizacion(p[2])
 
 #Gramatica para las expresiones binarias booleanas
 #
@@ -385,6 +445,7 @@ def p_EXPBINBOOL(p):
 		      | EXP MenorIgual EXP
 		      | EXP Igual EXP
 		      | EXP Desigual EXP'''
+	p[0] = expbinbool(p[1], p[2], p[3])
 
 #Gramatica para las experesiones binarias aritmeticas
 #
@@ -394,27 +455,39 @@ def p_EXPBINARIT(p):
 			| EXP Mult EXP
 			| EXP Div EXP
 			| EXP Mod EXP'''
+	p[0] = expbinarit(p[1], p[2], p[3])
 
 #Gramatica para las expresiones unarias booleanas
 #
 def p_EXPUNABOOL(p):
 	'''EXPUNABOOL : Negacion EXP '''
+	p[0]= p[2]
 
 
 #Gramatica para las expresiones unarias aritmeticas
 #
 def p_EXPUNAARIT(p):
-	'''EXPUNAARIT : Menos EXP %prec UMenos'''	
+	'''EXPUNAARIT : Menos EXP %prec UMenos'''
+	p[0] = p[2]	
 
+#Gramatica para las instrucciones sobre cintas
+#
 def p_INSTAPE(p):
 	'''INSTAPE : BINSTRUCCIONES At EXP
 		    | Inspeccion EXP
 		    | EXP Concat EXP'''
+	if len(p)== 3:
+		p[0] = p[2]
+	else:
+		p[0] = instape(p[1], p[2], p[3])
+
 
 #Gramatica para las b-intrucciones
 #
 def p_BINSTRUCCIONES(p):
 	'''BINSTRUCCIONES : LlaveAbre OPBINSTRUCCIONES LlaveCierra '''
+	p[0] = p[2] 
+
 
 #Gramatica para las operaciones de las b-instrucciones
 #
@@ -426,6 +499,11 @@ def p_OPBINSTRUCCIONES(p):
 			    | OPBINSTRUCCIONES Punto
 			    | OPBINSTRUCCIONES Coma
 			    | '''
+	if len(p) == 3:
+		p[0] = opinstrucciones(p[1], p[2])
+#	else:
+#		p[0] = p[1]
+
 
 #Gramatica para el tipo tape
 #
@@ -433,34 +511,42 @@ def p_EXPTAPE(p):
 	'''EXPTAPE : CorcheteAbre Num CorcheteCierra
 		    | CorcheteAbre Ident CorcheteCierra 
 		    | CorcheteAbre EXPBINARIT CorcheteCierra'''
+	p[0] = p[2]
 
 #Gramatica para los BOOLEANOS
 #
 def p_BOOLEAN(p):
 	'''BOOLEAN : True
 		    | False '''
+	p[0] = p[1]
 
 #Gramatica para la iteraciones indeterminada
 #
 def p_ITERACIONINDET(p):
 	'''ITERACIONINDET : While EXP Do INSTRUCCION '''	
-
+	p[0] = iteracionindet(p[2],p[4])
 
 #Gramatica para las iteraciones determinadas
 #
 def p_ITERACIONDET(p):
 	'''ITERACIONDET : For IDENT From EXP To EXP Do INSTRUCCION
 	      		| For EXP To EXP Do INSTRUCCION '''	
+	if len(p)==9:
+		p[0] = iteraciondet(p[2], p[4], p[6], p[8])
+	else:
+		p[0] =iteraciondetExp(p[2], p[4], p[6])
 
 #Gramatica para la entrada
 #
 def p_ENTRADA(p):
-	'''ENTRADA : Read IDENT'''	
+	'''ENTRADA : Read IDENT'''
+	p[0] = p[2]	
 
 #Gramatica para la salida
 #
 def p_SALIDA(p):
 	'''SALIDA : Write EXP'''
+	p[0] = p[2]
 
 #**********************************
 # Obteniendo errores de sintaxis. * 

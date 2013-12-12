@@ -1,0 +1,6 @@
+declare foo, bar :: integer;
+         hola :: boolean execute
+    if bar > 2 then
+        foo := 35 + bar
+    done
+done

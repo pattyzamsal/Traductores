@@ -1,0 +1,2 @@
+declare foo :: integer execute
+done
