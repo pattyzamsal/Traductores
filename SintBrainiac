@@ -268,73 +268,111 @@ precedence = (
 #*********************************************
 class Expr: pass
 
+class identacion():
+  nivel = 0
+  
+  def imprimirEspacios(self):
+    for i in range(self.nivel):
+      print "   ",
+    return ''
 
-class secuenciacion(Expr):
-    def __init__(self,inst1=None,inst2=None):
+class secuenciacion(identacion):
+    def __init__(self,inst1,inst2):
         self.inst1 = inst1
         self.inst2 = inst2
 
-class asignacion(Expr):
-	def __init__(self, ident=None,exp=None):
+    def impresion(self):
+		print "SECUENCIACION"
+		self.nivel += 1
+		self.imprimirEspacios()
+		self.inst1.impresion()
+		self.inst2.impresion()
+
+class asignacion(identacion):
+	def __init__(self, ident, exp):
 		self.ident = ident
 		self.exp = exp
-		print ident, exp
 
-class condicional(Expr):
-	def __init__(self, exp=None, inst=None):
+	def impresion(self):
+		print "ASIGNACION"
+		self.nivel = self.nivel + 1
+		self.imprimirEspacios()
+		print "- var: "+self.ident
+		self.imprimirEspacios()
+		print "- valor: "+self.exp
+
+
+class condicional(identacion):
+	def __init__(self, exp, inst):
 		self.exp = exp
 		self.inst = inst
 
-class condicionalElse(Expr):
+	
+class condicionalElse(identacion):
 	def __init__(self, exp, inst1, inst2):
 		self.exp = exp
 		self.inst1 = inst1
 		self.inst2 = inst2
 
-class parentizacion(Expr):
+class parentizacion(identacion):
 	def __init__(self, exp):
 		self.exp = exp
 
-class expbinbool(Expr):
+class expbinbool(identacion):
 	def __init__(self, exp1, op, exp2):
 		self.exp1 = exp1
 		self.exp2 = exp2
 		self.op = op
 
-class expbinarit(Expr):
+	
+
+
+class expbinarit(identacion):
 	def __init__(self, exp1, op, exp2):
 		self.exp1 = exp1
 		self.exp2 = exp2
 		self.op = op
 
-class instape(Expr):
+	def impresion(self):
+		print "BIN_ARITMETICO"
+		self.nivel = self.nivel + 1
+		self.imprimirEspacios()
+		print "- operacion: "+self.op
+		self.imprimirEspacios()
+		print "- operador izquierdo: "+self.exp1
+		self.imprimirEspacios()
+		print "- operador derecho: "+self.exp2
+
+	
+class instape(identacion):
 	def __init__(self, exp1, op, exp2):
 		self.exp1 = exp1
 		self.exp2 = exp2
 		self.op = op
 
-class opinstrucciones(Expr):
+class opinstrucciones(identacion):
 	def __init__(self, inst, op):
 		self.inst = inst
 		self.op = op
 
-class iteracionindet(Expr):
+class iteracionindet(identacion):
 	def __init__(self, exp, inst):
 		self.exp = exp
 		self.inst = inst
 
-class iteraciondet(Expr):
+class iteraciondet(identacion):
 	def __init__(self, ident, exp1, exp2, inst):
 		self.ident = ident
 		self.exp1 = exp1
 		self.exp2 = exp2
 		self.inst = inst
 
-class iteraciondetExp(Expr):
+class iteraciondetExp(identacion):
 	def __init__(self, exp1, exp2, inst):
 		self.exp1 = exp1
 		self.exp2 = exp2
 		self.inst = inst
+
 #*********************************************
 # Definicion de la gramatica. *
 #*********************************************
@@ -571,4 +609,7 @@ def p_error(p):
 if __name__=='__main__':
     lexer = lex.lex() 
     yacc.yacc()
-    yacc.parse(archivo, lexer = lexer, tracking=True)
+    arbol = yacc.parse(archivo, lexer = lexer, tracking=True)
+    arbol.impresion()
+
+
