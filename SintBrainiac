@@ -14,7 +14,7 @@ import sys
 
 #***********************************************************
 #                                                          *
-#    hola             COMIENZO DE LA ENTREGA 1                 *
+#                 COMIENZO DE LA ENTREGA 1                 *
 #                                                          *
 #***********************************************************
 
@@ -459,15 +459,15 @@ class expunaarit(identar):
 	self.exp.nivel = self.nivel
 	self.exp.impresion()
 
-# Clase de las instrucciones concatenacion y ejecucion de los tapes
-class instape(identar):
+# Clase de la concatenacion de los tapes
+class concat(identar):
     def __init__(self, exp1, op, exp2):
 	self.exp1 = exp1
 	self.exp2 = exp2
 	self.op = op
     # metodo para imprimir en el arbol
     def impresion(self):
-	print "INSTRUCCION_TAPE"
+	print "INSTRUCCION_TAPE_CONCAT"
 	self.nivel = self.nivel + 1
 	self.imprimirEspacios()
 	print "- operacion: "+self.op
@@ -480,6 +480,28 @@ class instape(identar):
 	self.exp2.nivel = self.nivel
 	self.exp2.impresion()
 
+# Clase de la ejecucion de los tapes
+class ejecucion(identar):
+    def __init__(self, exp1, op, exp2):
+	self.exp1 = exp1
+	self.exp2 = exp2
+	self.op = op
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "INSTRUCCION_TAPE_EJECUCION"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- operacion: "+self.op
+	self.imprimirEspacios()
+	print "- operador izquierdo:",
+	self.exp1.nivel = self.nivel
+	self.exp1.impresion()
+	print "\n"
+	self.imprimirEspacios()
+	print "- operador derecho:",
+	self.exp2.nivel = self.nivel
+	self.exp2.impresion()
+
 # Clase de la instruccion inspeccion de los tapes
 class inspeccion(identar):
     def __init__(self, op, exp):
@@ -487,7 +509,7 @@ class inspeccion(identar):
 	self.op = op
     # metodo para imprimir en el arbol
     def impresion(self):
-	print "INSTRUCCION_TAPE"
+	print "INSTRUCCION_TAPE_INSPECCION"
 	self.nivel = self.nivel + 1
 	self.imprimirEspacios()
 	print "- operacion: "+self.op
@@ -761,9 +783,12 @@ def p_INSTAPE(p):
 	if len(p)== 3:
 		p[0] = inspeccion(p[1],p[2])
 	else:
-		p[0] = instape(p[1], p[2], p[3])
+	    if p[2] == 'at':
+		p[0] = ejecucion(p[1], p[2], p[3])
+	    elif p[2] == '&':
+		p[0] = concat(p[1], p[2], p[3])
 
-#Gramatica para las b-intrucciones
+	    #Gramatica para las b-intrucciones
 #
 def p_BINSTRUCCIONES(p):
 	'''BINSTRUCCIONES : LlaveAbre OPBINSTRUCCIONES LlaveCierra'''
