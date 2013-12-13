@@ -275,22 +275,25 @@ class identar():
       print "   ",
     return ''
 
-class Expr: pass
-
-# Clase de Secuenciacion
+# Clase de secuenciacion
 class secuenciacion(identar):
     def __init__(self,inst1,inst2):
         self.inst1 = inst1
         self.inst2 = inst2
     # metodo para imprimir en el arbol
     def impresion(self):
-	print "SECUENCIACION"
-	self.nivel += 1
+	# if para imprimir una sola vez la palabra SECUENCIACION
+	if self.nivel == 0:
+	    print "SECUENCIACION"
+	    self.nivel = 1
 	self.imprimirEspacios()
+	self.inst1.nivel = self.nivel
 	self.inst1.impresion()
+	self.inst2.nivel = self.nivel
+	self.imprimirEspacios()
 	self.inst2.impresion()
 
-# Clase de Asignacion
+# Clase de asignacion
 class asignacion(identar):
     def __init__(self, ident, exp):
 	self.ident = ident
@@ -302,91 +305,306 @@ class asignacion(identar):
 	self.imprimirEspacios()
 	print "- var: "+self.ident
 	self.imprimirEspacios()
-	print "- valor: ",
+	print "- valor:",
 	self.exp.nivel = self.nivel
 	self.exp.impresion()
 
+# Clase de subprogram
+class subprogram(identar):
+    def __init__(self,inst):
+	self.inst = inst
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "INCORPORACION DE ALCANCE"
+	self.nivel = self.nivel + 1
+	self.inst.nivel = self.nivel
+	self.inst.impresion()
+
+# Clase de termino
 class termino(identar):
     def __init__(self, termino):
 	self.termino = termino
-    #
+    # metodo para imprimir en el arbol
     def impresion(self):
         print str(self.termino)
 
+# Clase de condicional
 class condicional(identar):
-	def __init__(self, exp, inst):
-		self.exp = exp
-		self.inst = inst
+    def __init__(self, exp, inst):
+	self.exp = exp
+	self.inst = inst
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "CONDICIONAL"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- guardia:",
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
+	self.imprimirEspacios()
+	print "- exito:",
+	self.inst.nivel = self.nivel
+	self.inst.impresion()
 
-	
+# Clase de condicionalElse
 class condicionalElse(identar):
-	def __init__(self, exp, inst1, inst2):
-		self.exp = exp
-		self.inst1 = inst1
-		self.inst2 = inst2
-
+    def __init__(self, exp, inst1, inst2):
+	self.exp = exp
+	self.inst1 = inst1
+	self.inst2 = inst2
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "CONDICIONAL_ELSE"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- guardia:",
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
+	self.imprimirEspacios()
+	print "- exito:",
+	self.inst1.nivel = self.nivel
+	self.inst1.impresion()
+	self.imprimirEspacios()
+	print "- fallo:",
+	self.inst2.nivel = self.nivel
+	self.inst2.impresion()
+ 
+# Clase de expresiones parentizadas
 class parentizacion(identar):
-	def __init__(self, exp):
-		self.exp = exp
+    def __init__(self, exp):
+	self.exp = exp
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
 
+# Clase de expresiones binarias booleanas
 class expbinbool(identar):
-	def __init__(self, exp1, op, exp2):
-		self.exp1 = exp1
-		self.exp2 = exp2
-		self.op = op
+    def __init__(self, exp1, op, exp2):
+	self.exp1 = exp1
+	self.exp2 = exp2
+	self.op = op
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "BIN_RELACIONAL"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- operacion: "+self.op
+	self.imprimirEspacios()
+	print "- operador izquierdo:",
+	self.exp1.nivel = self.nivel
+	self.exp1.impresion()
+	self.imprimirEspacios()
+	print "- operador derecho:",
+	self.exp2.nivel = self.nivel
+	self.exp2.impresion()
 
+# Clase de expresiones unarias booleanas
+class expunabool(identar):
+    def __init__(self,exp):
+	self.exp = exp
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "UNARIO_BOOLEANO"
+	self.nivel = self.nivel+1
+	self.imprimirEspacios()
+	print "- operacion: ~"
+	self.imprimirEspacios()
+	print "- operacion:",
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
+
+# Clase de los booleanos
+class boolean(identar):
+    def __init__(self,valor):
+	self.valor = valor
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print str(self.valor)
+
+# Clase de expresiones binarias aritmeticas
 class expbinarit(identar):
-	def __init__(self, exp1, op, exp2):
-		self.exp1 = exp1
-		self.exp2 = exp2
-		self.op = op
+    def __init__(self, exp1, op, exp2):
+	self.exp1 = exp1
+	self.exp2 = exp2
+	self.op = op
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "BIN_ARITMETICO"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- operacion: "+self.op
+	self.imprimirEspacios()
+	print "- operador izquierdo:",
+	self.exp1.nivel = self.nivel
+	self.exp1.impresion()
+	self.imprimirEspacios()
+	print "- operador derecho:",
+	self.exp2.nivel = self.nivel
+	self.exp2.impresion()
 
-	def impresion(self):
-		print "BIN_ARITMETICO"
-		self.nivel = self.nivel + 1
-		self.imprimirEspacios()
-		print "- operacion: "+self.op
-		self.imprimirEspacios()
-		print "- operador izquierdo:",
-		self.exp1.nivel = self.nivel
-		self.exp1.impresion()
-		self.imprimirEspacios()
-		print "- operador derecho:",
-		self.exp2.nivel = self.nivel
-		self.exp2.impresion()
+# Clase de expresiones unarias aritmeticas
+class expunaarit(identar):
+    def __init__(self,exp):
+	self.exp = exp
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "UNARIO_ARITMETICO"
+	self.nivel = self.nivel+1
+	self.imprimirEspacios()
+	print "- operacion: -"
+	self.imprimirEspacios()
+	print "- operacion:",
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
 
-	
+# Clase de las instrucciones concatenacion y ejecucion de los tapes
 class instape(identar):
-	def __init__(self, exp1, op, exp2):
-		self.exp1 = exp1
-		self.exp2 = exp2
-		self.op = op
+    def __init__(self, exp1, op, exp2):
+	self.exp1 = exp1
+	self.exp2 = exp2
+	self.op = op
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "INSTRUCCION_TAPE"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- operacion: "+self.op
+	self.imprimirEspacios()
+	print "- operador izquierdo:",
+	self.exp1.nivel = self.nivel
+	self.exp1.impresion()
+	self.imprimirEspacios()
+	print "- operador derecho:",
+	self.exp2.nivel = self.nivel
+	self.exp2.impresion()
 
+# Clase de la instruccion inspeccion de los tapes
+class inspeccion(identar):
+    def __init__(self, op, exp):
+	self.exp = exp
+	self.op = op
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "INSTRUCCION_TAPE"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- operacion: "+self.op
+	self.imprimirEspacios()
+	print "- operador:",
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
+
+# Clase de las operaciones sobre las b-instrucciones de los tapes
 class opinstrucciones(identar):
-	def __init__(self, inst, op):
-		self.inst = inst
-		self.op = op
+    def __init__(self, op):
+	self.op = op
+#	self.inst = inst
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "OPERACION_BINSTRUCCION"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- operacion: "+self.op
+#	if type(self.inst) == None:
+#	    pass
+#	self.imprimirEspacios()
+#	print "- operacion: ",
+#	self.inst.impresion()
 
+# Clase de iteracion indeterminada
 class iteracionindet(identar):
-	def __init__(self, exp, inst):
-		self.exp = exp
-		self.inst = inst
+    def __init__(self, exp, inst):
+	self.exp = exp
+	self.inst = inst
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "ITERACION_INDETERMINADA"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- guardia:",
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
+	self.imprimirEspacios()
+	print "- operacion:",
+	self.inst.nivel = self.nivel
+	self.inst.impresion()
 
+# Clase de iteracion determinada con un identificador
+class iteraciondetIdent(identar):
+    def __init__(self, ident, exp1, exp2, inst):
+	self.ident = ident
+	self.exp1 = exp1
+	self.exp2 = exp2
+	self.inst = inst
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "ITERACION_DETERMINADA_IDENT"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- valor: "+str(self.ident)
+	self.imprimirEspacios()
+	print "- desde:",
+	self.exp1.nivel = self.exp1.nivel
+	self.exp1.impresion()
+	self.imprimirEspacios()
+	print "- hasta:",
+	self.exp2.nivel = self.exp2.nivel
+	self.exp2.impresion()
+	self.imprimirEspacios()
+	print "- operacion:",
+	self.inst.nivel = self.inst.nivel
+	self.inst.impresion()
+
+# Clase de iteracion determinada
 class iteraciondet(identar):
-	def __init__(self, ident, exp1, exp2, inst):
-		self.ident = ident
-		self.exp1 = exp1
-		self.exp2 = exp2
-		self.inst = inst
+    def __init__(self, exp1, exp2, inst):
+	self.exp1 = exp1
+	self.exp2 = exp2
+	self.inst = inst
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "ITERACION_DETERMINADA"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- desde:",
+	self.exp1.nivel = self.exp1.nivel
+	self.exp1.impresion()
+	self.imprimirEspacios()
+	print "- hasta:",
+	self.exp2.nivel = self.exp2.nivel
+	self.exp2.impresion()
+	self.imprimirEspacios()
+	print "- operacion:",
+	self.inst.nivel = self.inst.nivel
+	self.inst.impresion()
 
-class iteraciondetExp(identar):
-	def __init__(self, exp1, exp2, inst):
-		self.exp1 = exp1
-		self.exp2 = exp2
-		self.inst = inst
+# Clase de read
+class entrada(identar):
+    def __init__(self,ident):
+	self.ident = ident
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "READ"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- valor: "+str(self.ident)
+
+# Clase de write
+class salida(identar):
+    def __init__(self,exp):
+	self.exp = exp
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "WRITE"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- valor:",
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
 
 #*********************************************
-# Definicion de la gramatica. *
+# Definicion de la gramatica.
 #*********************************************
 
 #Simbolo inicial
@@ -395,9 +613,9 @@ start = 'PROGRAM'
 #Gramatica para un programa en lenguaje BRAINIAC
 #
 def p_PROGRAM(p):
-	'''PROGRAM : DECLARE Execute INSTRUCCION
-		    | Execute INSTRUCCION '''
-  	if len(p) == 3:
+	'''PROGRAM : DECLARE Execute INSTRUCCION Done
+		    | Execute INSTRUCCION Done'''
+  	if len(p) == 4:
   		p[0] = p[2]
   	else:
   		p[0] = p[3] 
@@ -405,8 +623,8 @@ def p_PROGRAM(p):
 # Gramatica para un subprograma
 #
 def p_SUBPROGRAM(p):
-	''' SUBPROGRAM : DECLARE Execute INSTRUCCION'''
- 	p[0] = p[3]
+	''' SUBPROGRAM : DECLARE Execute INSTRUCCION Done'''
+ 	p[0] = subprogram(p[3])
 
 #Gramatica para las declaraciones del lenguaje
 #
@@ -435,8 +653,7 @@ def p_TIPO(p):
 #Gramatica para las instrucciones
 #
 def p_INSTRUCCION(p):
-	'''INSTRUCCION : INSTRUCCION PuntoYComa INSTRUCCION
-			| INSTRUCCION Done
+	'''INSTRUCCION : SECUENCIACION
 			| SUBPROGRAM
 	  		| ASIGNACION
 	  		| INSTAPE
@@ -445,11 +662,18 @@ def p_INSTRUCCION(p):
 	      		| ITERACIONDET
 	      		| ENTRADA
 	      		| SALIDA'''
-	if len(p) ==2 or len(p) == 3 :
+	if len(p) == 2:
 		p[0] = p[1]
-	else :
-		p[0] = secuenciacion(p[1],p[3])
 
+def p_SECUENCIACION(p):
+	'''SECUENCIACION : SECUENCIACION PuntoYComa INSTRUCCION
+			  | INSTRUCCION'''
+	if len(p) == 2:
+		p[0] = p[1]
+	else:
+		p[0] = secuenciacion(p[1],p[3])
+		# si entra aqui al menos una vez se deberia sumar 1 al nivel que lo hace la clase secuenciacion
+		# pero luego no deberia volver a entrar aqui ni volver a imprimir secuenciacion y mantener el nivel
 
 #Gramatica para la asignacion
 #
@@ -460,9 +684,9 @@ def p_ASIGNACION(p):
 #Gramatica para los condicionales
 #
 def p_CONDICIONAL(p):
-	'''CONDICIONAL : If EXP Then INSTRUCCION Else INSTRUCCION
-	      		| If EXP Then INSTRUCCION'''
-	if len(p) == 5:
+	'''CONDICIONAL : If EXP Then INSTRUCCION Else INSTRUCCION Done
+	      		| If EXP Then INSTRUCCION Done'''
+	if len(p) == 6:
 		p[0] = condicional(p[2],p[4])
 	else:
 		p[0] = condicionalElse(p[2], p[4], p[6])
@@ -517,15 +741,14 @@ def p_EXPBINARIT(p):
 #Gramatica para las expresiones unarias booleanas
 #
 def p_EXPUNABOOL(p):
-	'''EXPUNABOOL : Negacion EXP '''
-	p[0]= p[2]
-
+	'''EXPUNABOOL : Negacion EXP'''
+	p[0]= expunabool(p[2])
 
 #Gramatica para las expresiones unarias aritmeticas
 #
 def p_EXPUNAARIT(p):
 	'''EXPUNAARIT : Menos EXP %prec UMenos'''
-	p[0] = p[2]	
+	p[0] = expunaarit(p[2])
 
 #Gramatica para las instrucciones sobre cintas
 #
@@ -534,39 +757,33 @@ def p_INSTAPE(p):
 		    | Inspeccion EXP
 		    | EXP Concat EXP'''
 	if len(p)== 3:
-		p[0] = p[2]
+		p[0] = inspeccion(p[1],p[2])
 	else:
 		p[0] = instape(p[1], p[2], p[3])
-
 
 #Gramatica para las b-intrucciones
 #
 def p_BINSTRUCCIONES(p):
-	'''BINSTRUCCIONES : LlaveAbre OPBINSTRUCCIONES LlaveCierra '''
+	'''BINSTRUCCIONES : LlaveAbre OPBINSTRUCCIONES LlaveCierra'''
 	p[0] = p[2] 
-
 
 #Gramatica para las operaciones de las b-instrucciones
 #
 def p_OPBINSTRUCCIONES(p):
-	'''OPBINSTRUCCIONES : OPBINSTRUCCIONES Mas
-			    | OPBINSTRUCCIONES Menos
-			    | OPBINSTRUCCIONES Mayor
-			    | OPBINSTRUCCIONES Menor
-			    | OPBINSTRUCCIONES Punto
-			    | OPBINSTRUCCIONES Coma
+	'''OPBINSTRUCCIONES : Mas OPBINSTRUCCIONES
+			    | Menos OPBINSTRUCCIONES
+			    | Mayor OPBINSTRUCCIONES
+			    | Menor OPBINSTRUCCIONES
+			    | Punto OPBINSTRUCCIONES
+			    | Coma OPBINSTRUCCIONES
 			    | '''
 	if len(p) == 3:
-		p[0] = opinstrucciones(p[1], p[2])
-#	else:
-#		p[0] = p[1]
+		p[0] = opinstrucciones(p[1])
 
-
-#Gramatica para el tipo tape
+#Gramatica para las expresiones del tipo tape
 #
 def p_EXPTAPE(p):
-	'''EXPTAPE : CorcheteAbre Num CorcheteCierra
-		    | CorcheteAbre Ident CorcheteCierra 
+	'''EXPTAPE : CorcheteAbre TERMINO CorcheteCierra
 		    | CorcheteAbre EXPBINARIT CorcheteCierra'''
 	p[0] = p[2]
 
@@ -574,51 +791,49 @@ def p_EXPTAPE(p):
 #
 def p_BOOLEAN(p):
 	'''BOOLEAN : True
-		    | False '''
-	p[0] = p[1]
+		    | False'''
+	p[0] = boolean(p[1])
 
 #Gramatica para la iteraciones indeterminada
 #
 def p_ITERACIONINDET(p):
-	'''ITERACIONINDET : While EXP Do INSTRUCCION '''	
+	'''ITERACIONINDET : While EXP Do INSTRUCCION Done'''
 	p[0] = iteracionindet(p[2],p[4])
 
 #Gramatica para las iteraciones determinadas
 #
 def p_ITERACIONDET(p):
-	'''ITERACIONDET : For IDENT From EXP To EXP Do INSTRUCCION
-	      		| For EXP To EXP Do INSTRUCCION '''	
-	if len(p)==9:
-		p[0] = iteraciondet(p[2], p[4], p[6], p[8])
+	'''ITERACIONDET : For Ident From EXP To EXP Do INSTRUCCION Done
+	      		| For EXP To EXP Do INSTRUCCION Done'''
+	if len(p)==10:
+		p[0] = iteraciondetIdent(p[2], p[4], p[6], p[8])
 	else:
-		p[0] =iteraciondetExp(p[2], p[4], p[6])
+		p[0] =iteraciondet(p[2], p[4], p[6])
 
 #Gramatica para la entrada
 #
 def p_ENTRADA(p):
-	'''ENTRADA : Read IDENT'''
-	p[0] = p[2]	
+	'''ENTRADA : Read Ident'''
+	p[0] = entrada(p[2])
 
 #Gramatica para la salida
 #
 def p_SALIDA(p):
 	'''SALIDA : Write EXP'''
-	p[0] = p[2]
+	p[0] = salida(p[2])
 
 #**********************************
 # Obteniendo errores de sintaxis. * 
 #**********************************
-def p_error(p):											 
+def p_error(p):
     try:
         columna = hallar_columna(archivo,p) 
-		
 	if p.lexpos != 0:
             print("Error de sintaxis en linea %s, columna %s: token '%s' inesperado." % (p.lineno, columna, p.value))
         else :
             print("Error de sintaxis en linea %s, columna %s: token '%s' inesperado." % (p.lineno, columna + 1, p.value))
     except:
         print "Error de sintaxis en linea %s." %(lexer.lineno)
-    
     exit(0)
 
 #***************************************
@@ -630,5 +845,3 @@ if __name__=='__main__':
     yacc.yacc()
     arbol = yacc.parse(archivo, lexer = lexer, tracking=True)
     arbol.impresion()
-
-
