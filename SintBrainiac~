@@ -302,7 +302,7 @@ class asignacion(identar):
 	self.imprimirEspacios()
 	print "- var: "+self.ident
 	self.imprimirEspacios()
-	print "- valor:",
+	print "- valor: ",
 	self.exp.nivel = self.nivel
 	self.exp.impresion()
 
