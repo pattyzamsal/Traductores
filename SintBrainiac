@@ -241,8 +241,8 @@ if errores == 1:
 #***********************************************************
 
 #********************************
-# Precedencia de los operadores *
-# El orden va de menor a mayor. *
+# Precedencia de los operadores 
+# El orden va de menor a mayor. 
 #********************************
 
 precedence = ( 
@@ -666,6 +666,8 @@ def p_INSTRUCCION(p):
 	if len(p) == 2:
 		p[0] = p[1]
 
+#Gramatica para las instrucciones secuenciadas
+#
 def p_SECUENCIACION(p):
 	'''SECUENCIACION : SECUENCIACION PuntoYComa INSTRUCCION
 			  | INSTRUCCION'''
@@ -673,8 +675,6 @@ def p_SECUENCIACION(p):
 		p[0] = p[1]
 	else:
 		p[0] = secuenciacion(p[1],p[3])
-		# si entra aqui al menos una vez se deberia sumar 1 al nivel que lo hace la clase secuenciacion
-		# pero luego no deberia volver a entrar aqui ni volver a imprimir secuenciacion y mantener el nivel
 
 #Gramatica para la asignacion
 #
@@ -844,5 +844,6 @@ def p_error(p):
 if __name__=='__main__':
     lexer = lex.lex() 
     yacc.yacc()
+    # Se lee el archivo para hacer la impresion del arbol
     arbol = yacc.parse(archivo, lexer = lexer, tracking=True)
     arbol.impresion()
