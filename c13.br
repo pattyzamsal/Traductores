@@ -6,16 +6,16 @@ declare x, y :: integer;
     d := false;
     b := c /\ d;
     b :=  d \/ c;
-    b := ~c;
-    b := y /\ d;
-    x := -y;
-    write [5];
-    while x /= y do
-        x := x - y
-    done;
     for x from 5 to 6 do
         y := 9
     done;
+    b := ~c;
+    while x /= y do
+        x := x - y
+    done;
+    b := y /\ d;
+    x := -y;
+    write [5];
     for 5 to 7 do
         x := 10
     done
