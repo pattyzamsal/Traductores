@@ -1,2 +1,3 @@
+$- este caso no debe correr por error de sintaxis-$
 declare foo, bar :: integer execute
 done

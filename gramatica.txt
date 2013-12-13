@@ -41,8 +41,10 @@ EXP -> ParAbre EXP ParCierra
       | EXPTAPE
       | INSTAPE
       | BOOLEAN
-      | Num
-      | Ident
+      | TERMINO
+
+TERMINO -> Num
+	  | Ident
 
 EXPBINBOOL -> EXP Conjuncion EXP
 	    | EXP Disyuncion EXP

@@ -222,10 +222,8 @@ if (len(sys.argv) == 2):
 			imprimir = 'Tk%s' % str(tok.type) 
 		if errores == 0: lista_Tokens.append(imprimir)
 	if errores == 1:
-	    # el break hace que se imprima el primer error lexicografico
 	    for i in lista_errores:
 		  print i
-		  break
 else:
 	print "No se coloco un archivo para analizar o se colocaron argumentos de mas."
 	sys.exit(0)
@@ -264,70 +262,80 @@ precedence = (
 )
 
 #*********************************************
-# Definicion de las clases por cada simbolo. *
+# Definicion de las clases por cada simbolo.
 #*********************************************
-class Expr: pass
 
-class identacion():
+# Clase que van a heredar las clases de las producciones para generar las tabulaciones del arbol
+class identar():
+  # Se crea el primer nivel del arbol
   nivel = 0
-  
+  # Dependiendo del nivel del arbol se imprimiran los espacios como tabuladores
   def imprimirEspacios(self):
     for i in range(self.nivel):
       print "   ",
     return ''
 
-class secuenciacion(identacion):
+class Expr: pass
+
+# Clase de Secuenciacion
+class secuenciacion(identar):
     def __init__(self,inst1,inst2):
         self.inst1 = inst1
         self.inst2 = inst2
-
+    # metodo para imprimir en el arbol
     def impresion(self):
-		print "SECUENCIACION"
-		self.nivel += 1
-		self.imprimirEspacios()
-		self.inst1.impresion()
-		self.inst2.impresion()
+	print "SECUENCIACION"
+	self.nivel += 1
+	self.imprimirEspacios()
+	self.inst1.impresion()
+	self.inst2.impresion()
 
-class asignacion(identacion):
-	def __init__(self, ident, exp):
-		self.ident = ident
-		self.exp = exp
+# Clase de Asignacion
+class asignacion(identar):
+    def __init__(self, ident, exp):
+	self.ident = ident
+	self.exp = exp
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print "ASIGNACION"
+	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
+	print "- var: "+self.ident
+	self.imprimirEspacios()
+	print "- valor: ",
+	self.exp.nivel = self.nivel
+	self.exp.impresion()
 
-	def impresion(self):
-		print "ASIGNACION"
-		self.nivel = self.nivel + 1
-		self.imprimirEspacios()
-		print "- var: "+self.ident
-		self.imprimirEspacios()
-		print "- valor: "+self.exp
+class termino(identar):
+    def __init__(self, termino):
+	self.termino = termino
+    #
+    def impresion(self):
+        print str(self.termino)
 
-
-class condicional(identacion):
+class condicional(identar):
 	def __init__(self, exp, inst):
 		self.exp = exp
 		self.inst = inst
 
 	
-class condicionalElse(identacion):
+class condicionalElse(identar):
 	def __init__(self, exp, inst1, inst2):
 		self.exp = exp
 		self.inst1 = inst1
 		self.inst2 = inst2
 
-class parentizacion(identacion):
+class parentizacion(identar):
 	def __init__(self, exp):
 		self.exp = exp
 
-class expbinbool(identacion):
+class expbinbool(identar):
 	def __init__(self, exp1, op, exp2):
 		self.exp1 = exp1
 		self.exp2 = exp2
 		self.op = op
 
-	
-
-
-class expbinarit(identacion):
+class expbinarit(identar):
 	def __init__(self, exp1, op, exp2):
 		self.exp1 = exp1
 		self.exp2 = exp2
@@ -344,30 +352,30 @@ class expbinarit(identacion):
 		print "- operador derecho: "+self.exp2
 
 	
-class instape(identacion):
+class instape(identar):
 	def __init__(self, exp1, op, exp2):
 		self.exp1 = exp1
 		self.exp2 = exp2
 		self.op = op
 
-class opinstrucciones(identacion):
+class opinstrucciones(identar):
 	def __init__(self, inst, op):
 		self.inst = inst
 		self.op = op
 
-class iteracionindet(identacion):
+class iteracionindet(identar):
 	def __init__(self, exp, inst):
 		self.exp = exp
 		self.inst = inst
 
-class iteraciondet(identacion):
+class iteraciondet(identar):
 	def __init__(self, ident, exp1, exp2, inst):
 		self.ident = ident
 		self.exp1 = exp1
 		self.exp2 = exp2
 		self.inst = inst
 
-class iteraciondetExp(identacion):
+class iteraciondetExp(identar):
 	def __init__(self, exp1, exp2, inst):
 		self.exp1 = exp1
 		self.exp2 = exp2
@@ -380,17 +388,18 @@ class iteraciondetExp(identacion):
 #Simbolo inicial
 start = 'PROGRAM'
 
-#Gramatica para el token Program
+#Gramatica para un programa en lenguaje BRAINIAC
 #
 def p_PROGRAM(p):
 	'''PROGRAM : DECLARE Execute INSTRUCCION
-	      | Execute INSTRUCCION '''
+		    | Execute INSTRUCCION '''
   	if len(p) == 3:
   		p[0] = p[2]
   	else:
   		p[0] = p[3] 
   
 # Gramatica para un subprograma
+#
 def p_SUBPROGRAM(p):
 	''' SUBPROGRAM : DECLARE Execute INSTRUCCION'''
  	p[0] = p[3]
@@ -423,10 +432,10 @@ def p_TIPO(p):
 #
 def p_INSTRUCCION(p):
 	'''INSTRUCCION : INSTRUCCION PuntoYComa INSTRUCCION
-				| INSTRUCCION Done
-				| SUBPROGRAM
-		  		| ASIGNACION
-		  		| INSTAPE
+			| INSTRUCCION Done
+			| SUBPROGRAM
+	  		| ASIGNACION
+	  		| INSTAPE
 	      		| CONDICIONAL
 	      		| ITERACIONINDET
 	      		| ITERACIONDET
@@ -465,12 +474,18 @@ def p_EXP(p):
 		| EXPTAPE
 		| INSTAPE
 		| BOOLEAN
-		| Num
-		| Ident'''
+		| TERMINO'''
 	if len(p) ==2:
 		p[0]= p[1]
 	else:
 		p[0] = parentizacion(p[2])
+
+# Gramatica para los terminos
+#
+def p_TERMINO(p):
+	'''TERMINO : Num
+		    | Ident'''
+	p[0] = termino(p[1])
 
 #Gramatica para las expresiones binarias booleanas
 #
