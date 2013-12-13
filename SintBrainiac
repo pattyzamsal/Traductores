@@ -498,20 +498,21 @@ class inspeccion(identar):
 
 # Clase de las operaciones sobre las b-instrucciones de los tapes
 class opinstrucciones(identar):
-    def __init__(self, op):
+    def __init__(self, inst, op):
+	self.inst = inst
 	self.op = op
-#	self.inst = inst
     # metodo para imprimir en el arbol
     def impresion(self):
-	print "OPERACION_BINSTRUCCION"
-	self.nivel = self.nivel + 1
-	self.imprimirEspacios()
-	print "- operacion: "+self.op
-#	if type(self.inst) == None:
-#	    pass
-#	self.imprimirEspacios()
-#	print "- operacion: ",
-#	self.inst.impresion()
+	self.inst.impresion()
+	self.op.impresion()
+
+# Clase de las operaciones sobre las b-instrucciones de los tapes
+class operadoresbinst(identar):
+    def __init__(self, op):
+	self.op = op
+    # metodo para imprimir en el arbol
+    def impresion(self):
+	print self.op,
 
 # Clase de iteracion indeterminada
 class iteracionindet(identar):
@@ -771,15 +772,23 @@ def p_BINSTRUCCIONES(p):
 #Gramatica para las operaciones de las b-instrucciones
 #
 def p_OPBINSTRUCCIONES(p):
-	'''OPBINSTRUCCIONES : Mas OPBINSTRUCCIONES
-			    | Menos OPBINSTRUCCIONES
-			    | Mayor OPBINSTRUCCIONES
-			    | Menor OPBINSTRUCCIONES
-			    | Punto OPBINSTRUCCIONES
-			    | Coma OPBINSTRUCCIONES
-			    | '''
+	'''OPBINSTRUCCIONES : OPBINSTRUCCIONES OPERADORESBINST
+			    | OPERADORESBINST'''
 	if len(p) == 3:
-		p[0] = opinstrucciones(p[1])
+		p[0] = opinstrucciones(p[1],p[2])
+	else:
+		p[0] = p[1]
+
+#Gramatica para los operadores de las b-instrucciones
+#
+def p_OPERADORESBINST(p):
+	'''OPERADORESBINST : Mas
+			    | Menos
+			    | Mayor
+			    | Menor
+			    | Punto
+			    | Coma'''
+	p[0] = operadoresbinst(p[1])
 
 #Gramatica para las expresiones del tipo tape
 #
