@@ -306,10 +306,11 @@ class asignacion(identar):
 	self.exp.nivel = self.nivel
 	self.exp.impresion()
 
+# Clase de termino
 class termino(identar):
     def __init__(self, termino):
 	self.termino = termino
-    #
+    # metodo para imprimir en el arbol
     def impresion(self):
         print str(self.termino)
 
