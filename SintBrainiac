@@ -317,6 +317,7 @@ class subprogram(identar):
     def impresion(self):
 	print "INCORPORACION DE ALCANCE"
 	self.nivel = self.nivel + 1
+	self.imprimirEspacios()
 	self.inst.nivel = self.nivel
 	self.inst.impresion()
 
@@ -553,7 +554,7 @@ class iteraciondetIdent(identar):
 	self.exp2.impresion()
 	self.imprimirEspacios()
 	print "- operacion:",
-	self.inst.nivel = self.inst.nivel
+	self.inst.nivel = self.inst.nivel + 2
 	self.inst.impresion()
 
 # Clase de iteracion determinada
@@ -576,7 +577,7 @@ class iteraciondet(identar):
 	self.exp2.impresion()
 	self.imprimirEspacios()
 	print "- operacion:",
-	self.inst.nivel = self.inst.nivel
+	self.inst.nivel = self.inst.nivel + 2
 	self.inst.impresion()
 
 # Clase de read

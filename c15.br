@@ -1,4 +1,5 @@
 declare x, y :: integer; t :: tape execute
+$- Este caso no debe correr por error de sintaxis -$
 	x := 3 ;
 	y := 15 ;
 	from 1 to x do
