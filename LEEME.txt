@@ -1,0 +1,23 @@
+/* Autores: Vanessa Balleste y Patricia Zambrano
+ * Carnet: 08-10091 y 09-10919
+ * Fecha: 15/11/2013
+ * Profesor: Ricardo Monascal.
+ */
+
+El programa fue escrito en Python 2.7.3 y por ende se uso la herramienta ply para poder usar y definir los tokens relacionados al lenguaje de programacion Braniac.
+
+Que hace el programa: el programa se encarga de analizar un archivo que contendra todos las supuestas frases y simbolos que en teoria pertenecen al lenguaje Braniac, determinara si dichas frases y simbolos forman parte de los tokens del lenguaje, ademas mostrara el resultado del analisis por pantalla. Se incorporo al codigo el analisis sintactico incluye la definicion de la gramatica, la construccion y la impresion por pantalla del arbol sintactico abstracto corresponienten del arbol
+
+Como se compila: no hace falta compilarlo.
+
+Como se invoca: Se invoca a traves de las formas siguientes:
+    python SintBrainiac <nombre del archivo>
+		o
+    ./SintBrainiac <nombre del archivo> 
+    para esta ultima forma se debe revisar que el archivo tenga permisos de ejecucion, en el caso de no tener el permiso ejecutar en el terminal chmod +x SintBrainiax
+
+Que entradas requiere: requiere como entrada el archivo que contendra todas las instrucciones que supuestamente pertenecen al lenguaje braniac.
+
+Que salidas produce: escribe por pantalla lo siguiente:
+      -Si encuentra simbolos que no pertenecen al lenguaje braniac entonces imprime la lista de errores que contiene todos los simbolos que no pertenecen a braniac y su posicion dentro del archivo.
+      -Si el archivo contiene un programa valido sintacticamente imprime el arbol sintactico absracto correspondiente al  archivo de entrada, sino imprime una lista de los errores sintacticos encontrados. 
