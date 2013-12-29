@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Archivo: SintBraniac
-# Analizador lexicografico y sintactico del lenguaje Braniac con arbol sintactico abstracto
+# Archivo: ContBraniac
+# Analizador lexicografico, sintactico y de contexto del lenguaje Braniac
 # Autores: Vanessa Balleste y Patricia Zambrano
 # Carnet: 08-10091 y 09-10919
 # Fecha: 13/12/2013
@@ -237,6 +237,12 @@ if errores == 1:
 #***********************************************************
 #                                                          *
 #                   FIN DE LA ENTREGA 1                    *
+#                                                          *
+#***********************************************************
+
+#***********************************************************
+#                                                          *
+#                COMIENZO DE LA ENTREGA 2                  *
 #                                                          *
 #***********************************************************
 
@@ -881,3 +887,9 @@ if __name__=='__main__':
     # Se lee el archivo para hacer la impresion del arbol
     arbol = yacc.parse(archivo, lexer = lexer, tracking=True)
     arbol.impresion()
+
+#***********************************************************
+#                                                          *
+#                   FIN DE LA ENTREGA 2                    *
+#                                                          *
+#***********************************************************
