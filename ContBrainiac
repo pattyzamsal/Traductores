@@ -5,11 +5,12 @@
 # Analizador lexicografico, sintactico y de contexto del lenguaje Braniac
 # Autores: Vanessa Balleste y Patricia Zambrano
 # Carnet: 08-10091 y 09-10919
-# Fecha: 13/12/2013
+# Fecha: 10/01/2014
 
 # importacion de las librerias
 import ply.lex as lex 
 import ply.yacc as yacc
+import TablaSimbolos
 import sys
 
 #***********************************************************
@@ -133,6 +134,8 @@ def t_Num(t):
 	r'[0-9][0-9]*'
 	return t
 
+# OJO: tal vez para esta entrega hace falta cambiar esto para que el lexer lo reconozca como entero
+	
 # se ignoran los bloques de comentarios. Con el .* se hace que ignore cualquier caracter que este entre $- y -$
 # la funcion count cuenta cuantas veces aparece un salto de linea dentro de los comentarios
 def t_Comentario(t):
@@ -240,12 +243,6 @@ if errores == 1:
 #                                                          *
 #***********************************************************
 
-#***********************************************************
-#                                                          *
-#                COMIENZO DE LA ENTREGA 2                  *
-#                                                          *
-#***********************************************************
-
 #********************************
 # Precedencia de los operadores 
 # El orden va de menor a mayor. 
@@ -266,6 +263,23 @@ precedence = (
 	('right','Inspeccion'),
 	('left','At')
 )
+
+# Variable global que representa una lista de las tablas de símbolos de cada
+# bloque. En el código, se recorre de derecha a izquierda para representar la
+# precedencia de las declaraciones de variables
+listaTablas = []
+
+# Método que determina si una variable fue declarada o no. Si fue declarada,
+# retorna la instancia de declaración de dicha variable, respetando la 
+# precedencia de las declaraciones
+
+def estaDeclarada(id):
+  global listaTablas
+  for i in range(1,len(listaTablas)+1):
+    if listaTablas[-i].esMiembro(id,0)==1:
+      temporal = listaTablas[-i].encontrar(id)
+      return temporal
+  return None
 
 #*********************************************
 # Definicion de las clases por cada simbolo.
@@ -887,9 +901,3 @@ if __name__=='__main__':
     # Se lee el archivo para hacer la impresion del arbol
     arbol = yacc.parse(archivo, lexer = lexer, tracking=True)
     arbol.impresion()
-
-#***********************************************************
-#                                                          *
-#                   FIN DE LA ENTREGA 2                    *
-#                                                          *
-#***********************************************************

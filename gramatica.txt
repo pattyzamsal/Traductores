@@ -1,24 +1,24 @@
 PROGRAM ->  DECLARE Execute INSTRUCCION Done
-		    | Execute INSTRUCCION Done
+	  | Execute INSTRUCCION Done
 
 SUBPROGRAM -> DECLARE Execute INSTRUCCION Done
 
 DECLARE -> Declare LISTADECLARA 
 
 LISTADECLARA -> LISTADECLARA PuntoYComa IDENT Type TIPO
-	    		| IDENT Type TIPO 
+		| IDENT Type TIPO 
 
 IDENT -> IDENT Coma Ident
-		  | Ident
+	| Ident
 
 TIPO -> Integer
-		| Boolean
-		| 
+	| Boolean
+	| 
 
 INSTRUCCION -> SECUENCIACION
-			| SUBPROGRAM
-	  		| ASIGNACION
-	  		| INSTAPE
+		| SUBPROGRAM
+  		| ASIGNACION
+  		| INSTAPE
       		| CONDICIONAL
       		| ITERACIONINDET
       		| ITERACIONDET
@@ -26,7 +26,7 @@ INSTRUCCION -> SECUENCIACION
       		| SALIDA
 
 SECUENCIACION -> SECUENCIACION PuntoYComa INSTRUCCION
-			  | INSTRUCCION
+		| INSTRUCCION
 
 ASIGNACION -> Ident Asignacion EXP
 
@@ -44,7 +44,7 @@ EXP -> ParAbre EXP ParCierra
 		| TERMINO
 
 TERMINO -> Num
-		 | Ident
+	  | Ident
 
 EXPBINBOOL -> EXP Conjuncion EXP
 	      | EXP Disyuncion EXP
@@ -56,40 +56,41 @@ EXPBINBOOL -> EXP Conjuncion EXP
 	      | EXP Desigual EXP
 
  EXPBINARIT -> EXP Mas EXP
-			| EXP Menos EXP
-			| EXP Mult EXP
-			| EXP Div EXP
-			| EXP Mod EXP
+	      | EXP Menos EXP
+	      | EXP Mult EXP
+	      | EXP Div EXP
+	      | EXP Mod EXP
 
 EXPUNABOOL -> Negacion EXP
 
 EXPUNAARIT -> Menos EXP %prec UMenos
 
 INSTAPE -> BINSTRUCCIONES At EXP
-		    | Inspeccion EXP
-		    | EXP Concat EXP
+	  | Inspeccion EXP
+	  | EXP Concat EXP
 
 BINSTRUCCIONES -> LlaveAbre OPBINSTRUCCIONES LlaveCierra
 
 OPBINSTRUCCIONES -> OPBINSTRUCCIONES OPERADORESBINST
-			    | OPERADORESBINST
+		    | OPERADORESBINST
+
 OPERADORESBINST -> Mas
-			    | Menos
-			    | Mayor
-			    | Menor
-			    | Punto
-			    | Coma
+		  | Menos
+		  | Mayor
+		  | Menor
+		  | Punto
+		  | Coma
 
 EXPTAPE -> CorcheteAbre TERMINO CorcheteCierra
-		 | CorcheteAbre EXPBINARIT CorcheteCierra
+	  | CorcheteAbre EXPBINARIT CorcheteCierra
 
 BOOLEAN -> True
-		 | False
+	  | False
 
 ITERACIONINDET -> While EXP Do INSTRUCCION Done
 
 ITERACIONDET -> For Ident From EXP To EXP Do INSTRUCCION Done
-	      		| For EXP To EXP Do INSTRUCCION Done
+	      	| For EXP To EXP Do INSTRUCCION Done
 
 ENTRADA -> Read Ident
 
